@@ -1,4 +1,3 @@
-import 'package:client/features/home/screens/home_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'core/app_theme.dart';

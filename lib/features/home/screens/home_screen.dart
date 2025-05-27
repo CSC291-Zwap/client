@@ -4,7 +4,7 @@ import 'package:client/features/home/widgets/category_filter.dart';
 import 'package:client/features/home/widgets/item_type_toggle.dart';
 import 'package:client/features/home/widgets/product_card.dart';
 import 'package:client/features/home/widgets/search_bar.dart';
-import 'package:client/data/dummy_products.dart';
+import 'package:client/data/dummy_items.dart';
 
 class HomeScreen extends ConsumerWidget {
   @override
@@ -31,7 +31,7 @@ class HomeScreen extends ConsumerWidget {
             SizedBox(height: 12),
             Expanded(
               child: GridView.builder(
-                itemCount: dummyProducts.length,
+                itemCount: dummyItems.length,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   childAspectRatio: 0.7,
@@ -39,7 +39,7 @@ class HomeScreen extends ConsumerWidget {
                   crossAxisSpacing: 12,
                 ),
                 itemBuilder:
-                    (context, index) => ProductCard(data: dummyProducts[index]),
+                    (context, index) => ProductCard(data: dummyItems[index]),
               ),
             ),
           ],
