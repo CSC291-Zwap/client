@@ -4,7 +4,7 @@ class AppTheme {
   static ThemeData get theme {
     return ThemeData(
       primarySwatch: Colors.green,
-      // Add more theme customizations here if needed
+      useMaterial3: false,      // Add more theme customizations here if needed
     );
   }
 

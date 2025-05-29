@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:client/features/home/widgets/category_filter.dart';
-import 'package:client/features/home/widgets/item_type_toggle.dart';
 import 'package:client/features/home/widgets/product_card.dart';
 import 'package:client/features/home/widgets/search_bar.dart';
 import 'package:client/data/dummy_items.dart';
@@ -12,7 +11,17 @@ class HomeScreen extends ConsumerWidget {
     final selectedCategory = ref.watch(selectedCategoryProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text('Zwap')),
+      appBar: AppBar(
+        title: Text('Zwap'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.account_circle),
+            onPressed: () {
+              // TODO: Navigate to profile or show profile dialog
+            },
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -26,8 +35,6 @@ class HomeScreen extends ConsumerWidget {
                   (cat) =>
                       ref.read(selectedCategoryProvider.notifier).state = cat,
             ),
-            SizedBox(height: 12),
-            ItemTypeToggleWidget(),
             SizedBox(height: 12),
             Expanded(
               child: GridView.builder(
