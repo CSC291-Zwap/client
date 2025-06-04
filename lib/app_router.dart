@@ -1,3 +1,4 @@
+import 'package:client/features/profile/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'features/home/screens/home_screen.dart';
@@ -19,6 +20,10 @@ class AppRouter {
               final item = dummyItems.firstWhere((i) => i.id == id);
               return ItemDetailScreen(item: item);
             },
+          ),
+          GoRoute(
+            path: 'profile',
+            builder: (context, state) => ProfileScreen(),
           ),
         ],
       ),
