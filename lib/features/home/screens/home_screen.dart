@@ -4,6 +4,7 @@ import 'package:client/features/home/widgets/category_filter.dart';
 import 'package:client/features/home/widgets/product_card.dart';
 import 'package:client/features/home/widgets/search_bar.dart';
 import 'package:client/data/dummy_items.dart';
+import 'package:go_router/go_router.dart';
 
 class HomeScreen extends ConsumerWidget {
   @override
@@ -17,7 +18,7 @@ class HomeScreen extends ConsumerWidget {
           IconButton(
             icon: Icon(Icons.account_circle),
             onPressed: () {
-              // TODO: Navigate to profile or show profile dialog
+              context.push('/profile');
             },
           ),
         ],
