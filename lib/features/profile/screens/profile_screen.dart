@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:client/data/dummy_items.dart';
 import 'package:client/features/home/widgets/product_card.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:go_router/go_router.dart';
 
 class ProfileScreen extends StatelessWidget {
   ProfileScreen({super.key});
 
-  final String userName = "Thompson";
-  final String email = "thawzin.moem@kmutt.ac.th";
-
   @override
   Widget build(BuildContext context) {
+    final box = Hive.box('authBox');
+    final String userId = box.get('user_name', defaultValue: 'Unknown User');
+    final String email = box.get('user_email', defaultValue: 'No Email');
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
@@ -19,15 +22,17 @@ class ProfileScreen extends StatelessWidget {
         ),
         actions: [
           PopupMenuButton<String>(
-            onSelected: (value) {
+            onSelected: (value) async {
               if (value == 'edit') {
                 ScaffoldMessenger.of(
                   context,
                 ).showSnackBar(SnackBar(content: Text('Edit profile tapped')));
               } else if (value == 'logout') {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text('Log out tapped')));
+                // Clear all values in Hive and redirect to home
+                await box.clear();
+                if (context.mounted) {
+                  context.go('/');
+                }
               }
             },
             itemBuilder:
@@ -63,7 +68,7 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Center(
               child: Text(
-                userName,
+                userId,
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

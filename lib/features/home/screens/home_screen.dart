@@ -5,6 +5,7 @@ import 'package:client/features/home/widgets/product_card.dart';
 import 'package:client/features/home/widgets/search_bar.dart';
 import 'package:client/data/dummy_items.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class HomeScreen extends ConsumerWidget {
   @override
@@ -17,8 +18,14 @@ class HomeScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: Icon(Icons.account_circle),
-            onPressed: () {
-              context.push('/signup');
+            onPressed: () async {
+              final box = Hive.box('authBox');
+              final token = box.get('auth_token');
+              if (token != null && token is String && token.isNotEmpty) {
+                context.push('/profile');
+              } else {
+                context.push('/signup');
+              }
             },
           ),
         ],

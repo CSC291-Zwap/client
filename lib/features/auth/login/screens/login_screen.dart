@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:client/services/auth_api_service.dart';
 import 'package:client/data/models/user.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 // Providers for form fields
 final loginEmailProvider = StateProvider<String>((ref) => '');
@@ -13,6 +14,17 @@ final authApiServiceProvider = Provider<AuthApiService>(
 
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
+
+  Future<void> _saveToken(String token) async {
+    final box = Hive.box('authBox');
+    await box.put('auth_token', token);
+  }
+
+  Future<void> _saveInfo(String id, String email) async {
+    final box = Hive.box('authBox');
+    await box.put('user_id', id);
+    await box.put('user_email', email);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -156,6 +168,9 @@ class LoginScreen extends ConsumerWidget {
               updatedAt: '',
             );
             final token = data['token'];
+
+            await _saveToken(token);
+            await _saveInfo(user.id, user.email);
 
             ScaffoldMessenger.of(
               context,
