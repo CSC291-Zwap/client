@@ -1,3 +1,5 @@
+import 'package:client/features/auth/login/screens/login_screen.dart';
+import 'package:client/features/auth/signup/screens/signup_screen.dart';
 import 'package:client/features/profile/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -24,6 +26,14 @@ class AppRouter {
           GoRoute(
             path: 'profile',
             builder: (context, state) => ProfileScreen(),
+          ),
+          GoRoute(
+            path: 'signup',
+            builder: (context, state) => const SignupScreen(),
+          ),
+          GoRoute(
+            path: 'login',
+            builder: (context, state) => const LoginScreen(),
           ),
         ],
       ),

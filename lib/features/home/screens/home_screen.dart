@@ -18,7 +18,7 @@ class HomeScreen extends ConsumerWidget {
           IconButton(
             icon: Icon(Icons.account_circle),
             onPressed: () {
-              context.push('/profile');
+              context.push('/signup');
             },
           ),
         ],
