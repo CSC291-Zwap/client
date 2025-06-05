@@ -1,3 +1,4 @@
+import 'package:client/features/profile/providers/profile_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -172,6 +173,7 @@ class LoginScreen extends ConsumerWidget {
 
             await _saveToken(token);
             await _saveInfo(user.id, user.email);
+            ref.invalidate(profileProvider);
 
             ScaffoldMessenger.of(
               context,

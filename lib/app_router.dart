@@ -1,5 +1,6 @@
 import 'package:client/features/auth/login/screens/login_screen.dart';
 import 'package:client/features/auth/signup/screens/signup_screen.dart';
+import 'package:client/features/profile/screens/edit_profile_screen.dart';
 import 'package:client/features/profile/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -34,6 +35,13 @@ class AppRouter {
           GoRoute(
             path: 'login',
             builder: (context, state) => const LoginScreen(),
+          ),
+          GoRoute(
+            path: '/edit-profile',
+            builder: (context, state) {
+              final currentName = state.extra as String? ?? '';
+              return EditProfileScreen(currentName: currentName);
+            },
           ),
         ],
       ),
