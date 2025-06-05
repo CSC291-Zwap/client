@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:client/services/auth_api_service.dart';
@@ -177,6 +178,17 @@ class SignupScreen extends ConsumerWidget {
               'password': password,
             });
 
+            // Check for backend error (success: false)
+            if (response.data['success'] == false) {
+              final msg =
+                  response.data['msg'] ?? 'Signup failed. Please try again.';
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(msg)));
+              return;
+            }
+
+            // Proceed if success
             final data = response.data['data'];
             final userJson = data['newUser'];
             final token = data['token'];
@@ -190,6 +202,19 @@ class SignupScreen extends ConsumerWidget {
             if (context.mounted) {
               context.push('/login');
             }
+          } on DioException catch (e) {
+            String errorMessage = 'Signup failed. Please try again.';
+            if (e.response != null && e.response?.data != null) {
+              final data = e.response?.data;
+              if (data is Map && data['msg'] != null) {
+                errorMessage = data['msg'].toString();
+              } else if (data is Map && data['message'] != null) {
+                errorMessage = data['message'].toString();
+              }
+            }
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(errorMessage)));
           } catch (e) {
             ScaffoldMessenger.of(
               context,

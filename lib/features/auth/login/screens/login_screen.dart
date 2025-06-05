@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -179,6 +180,19 @@ class LoginScreen extends ConsumerWidget {
             if (context.mounted) {
               context.go('/');
             }
+          } on DioException catch (e) {
+            // DioException is the new name for DioError in recent dio versions
+            String errorMessage = 'Login failed. Please try again.';
+            if (e.response != null && e.response?.data != null) {
+              // Try to extract a message from backend response
+              final data = e.response?.data;
+              if (data is Map && data['message'] != null) {
+                errorMessage = data['message'].toString();
+              }
+            }
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(errorMessage)));
           } catch (e) {
             ScaffoldMessenger.of(
               context,
