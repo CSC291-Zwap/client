@@ -47,7 +47,7 @@ class ProfileScreen extends ConsumerWidget {
                 await box.clear();
                 ref.invalidate(profileProvider);
                 if (context.mounted) {
-                  context.go('/');
+                  context.go('/login');
                 }
               }
             },
