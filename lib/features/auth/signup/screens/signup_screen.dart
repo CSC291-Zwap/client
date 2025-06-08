@@ -49,7 +49,8 @@ class SignupScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 18),
                 _buildFooter(context),
-                const Spacer(),
+                // const Spacer(),
+                const SizedBox(height: 12),
                 const Padding(
                   padding: EdgeInsets.only(bottom: 16),
                   child: Text(

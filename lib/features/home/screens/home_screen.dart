@@ -8,13 +8,28 @@ import 'package:client/features/home/providers/items_provider.dart'; // <-- Add 
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
+  const HomeScreen({super.key});
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Invalidate the provider so it refetches when HomeScreen is shown
+    ref.invalidate(allItemsProvider);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final box = Hive.box('authBox');
     final token = box.get('auth_token');
     final selectedCategory = ref.watch(selectedCategoryProvider);
-    final itemsAsync = ref.watch(allItemsProvider); // <-- Watch the provider
+    final itemsAsync = ref.watch(allItemsProvider);
+    // print('HomeScreen created with token: $token');
 
     return Scaffold(
       appBar: AppBar(
@@ -31,6 +46,13 @@ class HomeScreen extends ConsumerWidget {
               : IconButton(
                 icon: Icon(Icons.account_circle),
                 onPressed: () async {
+                  if (token is! String || token.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Please log in first')),
+                    );
+                    context.push("/login");
+                    return;
+                  }
                   context.push('/profile');
                 },
               ),
@@ -43,7 +65,7 @@ class HomeScreen extends ConsumerWidget {
             SearchBarWidget(),
             SizedBox(height: 12),
             CategoryFilterWidget(
-              categories: ['Electronic', 'Clothes', 'Fashion', 'Others'],
+              categories: ['All', 'Electronic', 'Clothes', 'Fashion', 'Others'],
               selected: selectedCategory,
               onSelected:
                   (cat) =>
@@ -72,12 +94,13 @@ class HomeScreen extends ConsumerWidget {
         ),
       ),
       floatingActionButton: Visibility(
-        visible: token != null && token is String && token.isNotEmpty,
+        visible: token is String && token.isNotEmpty,
         child: FloatingActionButton(
           backgroundColor: Colors.green,
-          onPressed: () {
+          onPressed: () async {
             // Navigate to Add Item page
-            context.push('/add-item');
+            await context.push('/add-item');
+            ref.invalidate(allItemsProvider); // Refresh items after adding
           },
           child: const Icon(Icons.add),
         ),

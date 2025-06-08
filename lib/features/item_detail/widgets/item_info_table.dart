@@ -11,10 +11,12 @@ class ProductInfoTable extends StatelessWidget {
       columnWidths: const {0: IntrinsicColumnWidth(), 1: FlexColumnWidth()},
       border: TableBorder.all(color: Colors.grey.shade300),
       children: [
-        infoRow("Seller", "Thompson"),
-        infoRow("Contact No.", "+66 9799521617"),
-        infoRow("Pick up location", "Bangkok"),
-        infoRow("Product Condition", "7 (barely used)"),
+        infoRow("Seller", item.userName ?? "Unknown User"),
+        infoRow("Contact email", item.email ?? "Unknown Email"),
+        infoRow(
+          "Pick up location",
+          (item.pickUp != null ? item.pickUp! + ", Bangkok" : "Not specified"),
+        ),
       ],
     );
   }

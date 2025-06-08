@@ -45,4 +45,4 @@ class CategoryFilterWidget extends StatelessWidget {
   }
 }
 
-final selectedCategoryProvider = StateProvider<String>((ref) => 'Clothes');
+final selectedCategoryProvider = StateProvider<String>((ref) => 'All');

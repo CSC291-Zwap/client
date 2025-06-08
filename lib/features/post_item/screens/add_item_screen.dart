@@ -167,6 +167,7 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
         .createItem(itemData: itemData, images: _selectedImages);
 
     if (result['success']) {
+      // ref.invalidate(addItemProvider); // Clear state
       _showSuccessSnackBar('Item added successfully!');
       context.pop();
     } else {

@@ -22,13 +22,13 @@ class ProductCard extends StatelessWidget {
           children: [
             Expanded(
               child:
-                  data.image.isNotEmpty
+                  data.images.isNotEmpty
                       ? ClipRRect(
                         borderRadius: BorderRadius.vertical(
                           top: Radius.circular(12),
                         ),
                         child: Image.network(
-                          data.image,
+                          data.images[0],
                           fit: BoxFit.cover,
                           width: double.infinity,
                           errorBuilder: (context, error, stackTrace) {

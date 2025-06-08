@@ -42,6 +42,78 @@ class ItemApiService {
     }
   }
 
+  Future<Map<String, dynamic>> updateItem(
+    String itemId,
+    Map<String, dynamic> itemData,
+  ) async {
+    try {
+      final box = Hive.box('authBox');
+      final token = box.get('auth_token');
+
+      if (token == null) {
+        return {'success': false, 'message': 'No authentication token found'};
+      }
+      // print('Updating item bb with ID: $itemId');
+      final response = await dio.patch(
+        '/items/update/$itemId',
+        data: itemData,
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      print('Item updated successfully: ${response.data}');
+      return {
+        'success': true,
+        'data': response.data,
+        'message': 'Item updated successfully',
+      };
+    } on DioException catch (e) {
+      if (e.response != null) {
+        return {
+          'success': false,
+          'message': e.response?.data['message'] ?? 'Failed to update item',
+        };
+      } else {
+        return {'success': false, 'message': 'Network error: ${e.message}'};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Unexpected error: ${e.toString()}'};
+    }
+  }
+
+  Future<Map<String, dynamic>> deleteItem(String itemId) async {
+    try {
+      final box = Hive.box('authBox');
+      final token = box.get('auth_token');
+
+      if (token == null) {
+        return {'success': false, 'message': 'No authentication token found'};
+      }
+
+      final response = await dio.delete(
+        '/items/$itemId',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+
+      print('Item deleted successfully: ${response.data}');
+
+      return {
+        'success': true,
+        'data': response.data,
+        'message': 'Item deleted successfully',
+      };
+    } on DioException catch (e) {
+      if (e.response != null) {
+        return {
+          'success': false,
+          'message': e.response?.data['message'] ?? 'Failed to delete item',
+        };
+      } else {
+        return {'success': false, 'message': 'Network error: ${e.message}'};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Unexpected error: ${e.toString()}'};
+    }
+  }
+
   Future<Map<String, dynamic>> getUserItems(String userId) async {
     try {
       final box = Hive.box('authBox');
@@ -91,9 +163,9 @@ class ItemApiService {
         queryParameters: queryParams.isNotEmpty ? queryParams : null,
       );
 
-      print(
-        'Fetched all items successfully: ${response.data['data'][1]['images']}',
-      );
+      // print(
+      //   'Fetched all items successfully: ${response.data['data'][1]['images']}',
+      // );
 
       return {'success': true, 'data': response.data};
     } on DioException catch (e) {

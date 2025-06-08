@@ -8,14 +8,16 @@ final allItemsProvider = FutureProvider<List<Item>>((ref) async {
 
   if (result['success'] == true) {
     List<dynamic> itemsData = result['data']['data'];
+    print('Fetched data: $itemsData');
 
     // Convert raw data to Item objects using fromJson
     List<Item> items =
-        itemsData.map((itemData) {
-          return Item.fromJson(itemData);
-        }).toList();
-    print('Converted ${items.length} items');
-    print('First item: ${items.isNotEmpty ? items[0].title : 'No items'}');
+        itemsData
+            .where((item) => item != null)
+            .map((item) => Item.fromJson(item))
+            .toList();
+    // print('Converted ${items.length} items');
+    // print('First item: ${items.isNotEmpty ? items[0].title : 'No items'}');
 
     return items;
   } else {
