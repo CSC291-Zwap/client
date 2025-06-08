@@ -11,6 +11,7 @@ class ItemDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('ItemDetailScreen created with item: ${item.image}');
     return Scaffold(
       appBar: AppBar(title: Text(item.title)),
       body: SingleChildScrollView(
@@ -26,12 +27,12 @@ class ItemDetailScreen extends StatelessWidget {
 
             Text(
               item.description ??
-                  "Barely used cabinet, bought a few months ago. Already have a wardrobe.",
+                  "Barely used product, bought a few months ago. Already have a similar product.",
               style: const TextStyle(fontSize: 14, color: Colors.black87),
             ),
             const SizedBox(height: 16),
 
-            const ProductInfoTable(),
+            ProductInfoTable(item: item),
             const SizedBox(height: 24),
 
             const BuyNowButton(),

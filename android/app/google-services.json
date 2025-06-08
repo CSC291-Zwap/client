@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "128532727825",
+    "project_id": "zwap-v2",
+    "storage_bucket": "zwap-v2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:128532727825:android:79b764831969119e3e89b0",
+        "android_client_info": {
+          "package_name": "com.example.client"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOJSBvsF6J1Q6GLWSzzJ1SF8yNcdk5Sgk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:128532727825:android:482a1169e05a624a3e89b0",
+        "android_client_info": {
+          "package_name": "com.example.zwap"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOJSBvsF6J1Q6GLWSzzJ1SF8yNcdk5Sgk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,7 +1,9 @@
+import 'package:client/data/models/item.dart';
 import 'package:flutter/material.dart';
 
 class ProductInfoTable extends StatelessWidget {
-  const ProductInfoTable({super.key});
+  const ProductInfoTable({super.key, required this.item});
+  final Item item;
 
   @override
   Widget build(BuildContext context) {

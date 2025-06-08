@@ -63,6 +63,7 @@ class ProfileScreen extends ConsumerWidget {
         backgroundColor: Colors.green,
         onPressed: () {
           // Navigate to Add Item page
+          context.push('/add-item');
         },
         child: const Icon(Icons.add),
       ),

@@ -10,9 +10,17 @@ import 'package:hive_flutter/hive_flutter.dart';
 // Providers for form fields
 final loginEmailProvider = StateProvider<String>((ref) => '');
 final loginPasswordProvider = StateProvider<String>((ref) => '');
-final authApiServiceProvider = Provider<AuthApiService>(
-  (ref) => AuthApiService(),
-);
+final loginLoadingProvider = StateProvider<bool>((ref) => false);
+
+// Safe auth service provider
+final authApiServiceProvider = Provider<AuthApiService?>((ref) {
+  try {
+    return AuthApiService();
+  } catch (e) {
+    print('AuthApiService initialization failed: $e');
+    return null;
+  }
+});
 
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
@@ -32,36 +40,60 @@ class LoginScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final email = ref.watch(loginEmailProvider);
     final password = ref.watch(loginPasswordProvider);
+    final isLoading = ref.watch(loginLoadingProvider);
+    final authService = ref.watch(authApiServiceProvider);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 48),
-              _buildLogo(),
-              const SizedBox(height: 16),
-              _buildTitle(),
-              const SizedBox(height: 16),
-              _buildTagline(),
-              const SizedBox(height: 40),
-              _buildFormFields(ref),
-              const SizedBox(height: 32),
-              _buildLoginButton(context, ref, email, password),
-              const SizedBox(height: 18),
-              _buildFooter(context),
-              const Spacer(),
-              const Padding(
-                padding: EdgeInsets.only(bottom: 16),
-                child: Text(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 28),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 48),
+                _buildLogo(),
+                const SizedBox(height: 16),
+                _buildTitle(),
+                const SizedBox(height: 16),
+                _buildTagline(),
+                const SizedBox(height: 40),
+                _buildFormFields(ref),
+                const SizedBox(height: 32),
+                _buildLoginButton(
+                  context,
+                  ref,
+                  email,
+                  password,
+                  authService,
+                  isLoading,
+                ),
+                const SizedBox(height: 18),
+                _buildFooter(context),
+                const SizedBox(height: 16),
+                if (authService == null)
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.orange[100],
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.orange),
+                    ),
+                    child: const Text(
+                      'Warning: API service unavailable.',
+                      style: TextStyle(color: Colors.orange, fontSize: 12),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                const SizedBox(height: 16),
+                const Text(
                   'By signing up, agree to terms and conditions',
                   style: TextStyle(fontSize: 12, color: Colors.black54),
                   textAlign: TextAlign.center,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -142,82 +174,113 @@ class LoginScreen extends ConsumerWidget {
     WidgetRef ref,
     String email,
     String password,
+    AuthApiService? authService,
+    bool isLoading,
   ) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: () async {
-          if (email.isEmpty || password.isEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Please fill all fields')),
-            );
-            return;
-          }
-          try {
-            final authApi = ref.read(authApiServiceProvider);
-            final response = await authApi.login({
-              'email': email,
-              'password': password,
-            });
-
-            final data = response.data['data'];
-            final user = User(
-              id: data['id'],
-              name: null,
-              email: data['email'],
-              password: '',
-              createdAt: '',
-              updatedAt: '',
-            );
-            final token = data['token'];
-
-            await _saveToken(token);
-            await _saveInfo(user.id, user.email);
-            ref.invalidate(profileProvider);
-
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text('Welcome, ${user.email}!')));
-            await Future.delayed(const Duration(milliseconds: 500));
-            if (context.mounted) {
-              context.go('/');
-            }
-          } on DioException catch (e) {
-            // DioException is the new name for DioError in recent dio versions
-            String errorMessage = 'Login failed. Please try again.';
-            if (e.response != null && e.response?.data != null) {
-              // Try to extract a message from backend response
-              final data = e.response?.data;
-              if (data is Map && data['message'] != null) {
-                errorMessage = data['message'].toString();
-              }
-            }
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(errorMessage)));
-          } catch (e) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text('Login failed: $e')));
-          }
-        },
+        onPressed:
+            (authService == null || isLoading)
+                ? null
+                : () =>
+                    _handleLogin(context, ref, email, password, authService),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.grey,
-          side: const BorderSide(color: Colors.grey),
+          backgroundColor:
+              authService == null ? Colors.grey : const Color(0xFF43A047),
+          foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(vertical: 14),
         ),
-        child: const Text(
-          'Login',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.grey,
-            fontSize: 16,
-          ),
-        ),
+        child:
+            isLoading
+                ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+                : Text(
+                  authService == null ? 'Service Unavailable' : 'Login',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
       ),
     );
+  }
+
+  Future<void> _handleLogin(
+    BuildContext context,
+    WidgetRef ref,
+    String email,
+    String password,
+    AuthApiService authService,
+  ) async {
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please fill all fields')));
+      return;
+    }
+
+    ref.read(loginLoadingProvider.notifier).state = true;
+
+    try {
+      final response = await authService.login({
+        'email': email,
+        'password': password,
+      });
+
+      final data = response.data['data'];
+      final user = User(
+        id: data['id'],
+        name: null,
+        email: data['email'],
+        password: '',
+        createdAt: '',
+        updatedAt: '',
+      );
+      final token = data['token'];
+
+      await _saveToken(token);
+      await _saveInfo(user.id, user.email);
+      ref.invalidate(profileProvider);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Welcome, ${user.email}!')));
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (context.mounted) {
+          context.go('/');
+        }
+      }
+    } on DioException catch (e) {
+      if (context.mounted) {
+        String errorMessage = 'Login failed. Please try again.';
+        if (e.response != null && e.response?.data != null) {
+          final data = e.response?.data;
+          if (data is Map && data['message'] != null) {
+            errorMessage = data['message'].toString();
+          }
+        }
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(errorMessage)));
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Login failed: $e')));
+      }
+    } finally {
+      ref.read(loginLoadingProvider.notifier).state = false;
+    }
   }
 
   Widget _buildFooter(BuildContext context) {
@@ -226,9 +289,7 @@ class LoginScreen extends ConsumerWidget {
       children: [
         const Text("Don't have an Account? "),
         GestureDetector(
-          onTap: () {
-            context.push('/signup');
-          },
+          onTap: () => context.push('/signup'),
           child: const Text(
             'Sign Up!',
             style: TextStyle(
