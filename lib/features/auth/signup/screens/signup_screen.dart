@@ -25,39 +25,42 @@ class SignupScreen extends ConsumerWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 48),
-              _buildLogo(),
-              const SizedBox(height: 16),
-              _buildTitle(),
-              const SizedBox(height: 16),
-              _buildTagline(),
-              const SizedBox(height: 40),
-              _buildFormFields(ref),
-              const SizedBox(height: 32),
-              _buildRegisterButton(
-                context,
-                ref,
-                email,
-                password,
-                confirmPassword,
-              ),
-              const SizedBox(height: 18),
-              _buildFooter(context),
-              const Spacer(),
-              const Padding(
-                padding: EdgeInsets.only(bottom: 16),
-                child: Text(
-                  'By signing up, agree to terms and conditions',
-                  style: TextStyle(fontSize: 12, color: Colors.black54),
-                  textAlign: TextAlign.center,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 28),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 48),
+                _buildLogo(),
+                const SizedBox(height: 16),
+                _buildTitle(),
+                const SizedBox(height: 16),
+                _buildTagline(),
+                const SizedBox(height: 40),
+                _buildFormFields(ref),
+                const SizedBox(height: 32),
+                _buildRegisterButton(
+                  context,
+                  ref,
+                  email,
+                  password,
+                  confirmPassword,
                 ),
-              ),
-            ],
+                const SizedBox(height: 18),
+                _buildFooter(context),
+                // const Spacer(),
+                const SizedBox(height: 12),
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 16),
+                  child: Text(
+                    'By signing up, agree to terms and conditions',
+                    style: TextStyle(fontSize: 12, color: Colors.black54),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -177,7 +180,6 @@ class SignupScreen extends ConsumerWidget {
               'email': email,
               'password': password,
             });
-
             // Check for backend error (success: false)
             if (response.data['success'] == false) {
               final msg =

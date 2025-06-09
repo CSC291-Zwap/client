@@ -1,4 +1,7 @@
+import 'package:client/data/models/item.dart';
+import 'package:client/features/home/widgets/product_card.dart';
 import 'package:client/features/profile/screens/edit_profile_screen.dart';
+import 'package:client/services/profile_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:client/features/profile/providers/profile_provider.dart';
@@ -25,14 +28,27 @@ class ProfileScreen extends ConsumerWidget {
           PopupMenuButton<String>(
             onSelected: (value) async {
               if (value == 'edit') {
-                // Get the latest profile data
-                final user = ref.read(profileProvider).value;
-                if (user == null) {
+                // Get the current profile data from the async value
+                final currentProfile = ref.read(profileProvider);
+
+                // Check if we have valid profile data
+                if (!currentProfile.hasValue || currentProfile.value == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('No profile data to edit.')),
                   );
                   return;
                 }
+
+                final data = currentProfile.value!;
+                final user = data['user'] as Map<String, dynamic>?;
+
+                if (user == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('No user data to edit.')),
+                  );
+                  return;
+                }
+
                 // Use GoRouter to navigate and await result
                 final result = await context.push<String>(
                   '/edit-profile',
@@ -47,7 +63,7 @@ class ProfileScreen extends ConsumerWidget {
                 await box.clear();
                 ref.invalidate(profileProvider);
                 if (context.mounted) {
-                  context.go('/');
+                  context.go('/login');
                 }
               }
             },
@@ -63,16 +79,43 @@ class ProfileScreen extends ConsumerWidget {
         backgroundColor: Colors.green,
         onPressed: () {
           // Navigate to Add Item page
+          context.push('/add-item');
         },
         child: const Icon(Icons.add),
       ),
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Failed to load profile.')),
-        data: (user) {
-          if (user == null) {
+        error: (err, stack) {
+          // Redirect to login
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            final box = Hive.box('authBox');
+            await box.clear();
+            ref.invalidate(profileProvider);
+            if (context.mounted) {
+              context.go('/login');
+            }
+          });
+          return const Center(
+            child: Text('Session expired. Please log in again.'),
+          );
+        },
+        data: (data) {
+          print('Profile data fetched: $data');
+          if (data == null) {
             return const Center(child: Text('No profile data.'));
           }
+
+          // Extract user info and items from the restructured data
+          final user = data['user'] as Map<String, dynamic>?;
+          print('User data: $user');
+          final items =
+              user != null ? (user['items'] as List<dynamic>? ?? []) : [];
+          print('Items data: $items');
+          if (user == null) {
+            return const Center(child: Text('No user data.'));
+          }
+
+          // print('User data: $user');
           // Validate user id from backend matches local storage
           if (user['id'] != localUserId) {
             // Log out and redirect if not matching
@@ -87,7 +130,12 @@ class ProfileScreen extends ConsumerWidget {
               child: Text('Session expired. Please log in again.'),
             );
           }
-          final items = user['items'] as List<dynamic>? ?? [];
+
+          List<Item> itemsData =
+              items.map((item) {
+                return Item.fromJson(item);
+              }).toList();
+
           return Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -105,7 +153,7 @@ class ProfileScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
                 Center(
                   child: Text(
-                    user['name'] ?? 'Unknown User',
+                    (user['name'] ?? 'Unknown User'),
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -119,9 +167,9 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                Row(
+                const Row(
                   mainAxisAlignment: MainAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
                       'Listed Items',
                       style: TextStyle(
@@ -134,10 +182,10 @@ class ProfileScreen extends ConsumerWidget {
                 const SizedBox(height: 12),
                 Expanded(
                   child:
-                      items.isEmpty
+                      itemsData.isEmpty
                           ? const Center(child: Text('No items listed.'))
                           : GridView.builder(
-                            itemCount: items.length,
+                            itemCount: itemsData.length,
                             gridDelegate:
                                 const SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 2,
@@ -146,27 +194,9 @@ class ProfileScreen extends ConsumerWidget {
                                   childAspectRatio: 0.7,
                                 ),
                             itemBuilder: (context, index) {
-                              final item = items[index];
-                              // You can customize ProductCard to accept your item structure
-                              return Card(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        item['name'] ?? 'No Name',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(item['description'] ?? ''),
-                                    ],
-                                  ),
-                                ),
-                              );
+                              final Item item = itemsData[index];
+                              // print('Item in profile: $item');
+                              return ProductCard(data: item);
                             },
                           ),
                 ),

@@ -5,14 +5,22 @@ class ProfileService {
   final Dio dio = ApiService().dio;
 
   Future<Map<String, dynamic>?> getProfile(String token) async {
-    final response = await dio.get(
-      '/user/profile',
-      options: Options(headers: {'Authorization': 'Bearer $token'}),
-    );
-    if (response.data != null && response.data['user'] != null) {
-      return response.data['user'];
+    try {
+      final response = await dio.get(
+        '/user/profile',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      print('Profile response: ${response.data}');
+      if (response.data != null && response.data['user'] != null) {
+        return response.data;
+      }
+      return null;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw UnauthorizedException();
+      }
+      rethrow;
     }
-    return null;
   }
 
   Future<bool> updateName(String token, String name) async {
@@ -24,3 +32,5 @@ class ProfileService {
     return response.data['msg'] == 'Name updated successfully!';
   }
 }
+
+class UnauthorizedException implements Exception {}
